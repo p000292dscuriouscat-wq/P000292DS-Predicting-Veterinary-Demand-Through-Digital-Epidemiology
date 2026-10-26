@@ -1,0 +1,296 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>VetIQ | Demand Outlook</title>
+
+  <script src="{{ url_for('static', filename='js/plotly.min.js') }}"></script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+  <aside class="sidebar">
+
+    <a class="brand" href="#overview"><span class="brand-mark">V</span><span><strong>VetIQ</strong><small>Demand intelligence</small></span></a>
+
+    <div class="nav-caption">EXPLORE</div>
+
+    <nav aria-label="Main navigation">
+
+      <a href="#overview" class="active">⌂ <span>Overview</span></a>
+
+      <a href="#seasonality">▥ <span>Seasonal patterns</span></a>
+
+      <a href="#search-signals">⌕ <span>Google search signals</span></a>
+
+      <a href="#forecast">↗ <span>Forecast outlook</span></a>
+
+      <a href="#clinics">◎ <span>Clinic locations</span></a>
+
+      <a href="#method">ⓘ <span>About the data</span></a>
+
+    </nav>
+
+    <div class="side-footer"><span class="status-dot"></span> Research prototype<br><small>RMIT · Curious Cat · P000292DS</small></div>
+
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar"><span>Veterinary demand intelligence</span><span class="top-tag">South East Queensland · Research dashboard</span></header>
+
+    <div class="content">
+
+      <section id="overview" class="intro">
+
+        <div class="eyebrow">DEMAND OVERVIEW</div>
+
+        <h1>Know when tick-related demand may rise.</h1>
+
+        <p>Explore historical veterinary activity, seasonal patterns and online search signals—explained in everyday language.</p>
+
+      </section>
+
+      <section class="hero-grid" aria-label="Main takeaways">
+
+        <div class="feature-card">
+
+          <span class="feature-eyebrow">THE BIG PICTURE</span>
+
+          <h2>Spring is an important period to prepare for tick-related demand.</h2>
+
+          <p>The preliminary consultation analysis shows higher average activity around September and October. The exact timing varies by year and depends on data coverage.</p>
+
+          <a class="text-link" href="#seasonality">Explore the seasonal evidence →</a>
+
+        </div>
+
+        <div class="side-summary">
+
+          <div class="summary-icon">↗</div>
+
+          <h3>What should a clinic do?</h3>
+
+          <p>Review seasonal demand patterns before spring and consider staffing, appointment capacity and patient communications. This is planning context not a clinical alert.</p>
+
+          <div class="soft-divider"></div>
+
+          <small>Historical records available through <strong>{{ end_date }}</strong></small>
+
+        </div>
+
+      </section>
+
+<form class="filters" method="get" action="{{ url_for('dashboard') }}">
+
+
+
+  <div>
+
+      <label for="year">Select Year</label>
+
+
+
+      <select name="year" id="year">
+
+          <option value="all"
+
+              {% if selected_year == 'all' %}selected{% endif %}>
+
+              All Years (2021–2026)
+
+          </option>
+
+
+
+          {% for y in years %}
+
+          <option value="{{ y }}"
+
+              {% if selected_year|string == y|string %}selected{% endif %}>
+
+              {{ y }}
+
+          </option>
+
+          {% endfor %}
+
+      </select>
+
+  </div>
+
+
+
+  <button type="submit">Apply Filters</button>
+
+
+
+  <a href="{{ url_for('dashboard') }}" class="reset">
+
+      Reset
+
+  </a>
+
+
+
+</form>
+
+
+
+      <section class="stats" aria-label="Historical data summary">
+
+        <div class="stat"><span>Tick-related record matches</span><strong>{{ '{:,}'.format(total_tick_rows) }}</strong><small>Preliminary text matches, not confirmed cases</small></div>
+
+        <div class="stat"><span>All consultation records</span><strong>{{ '{:,}'.format(total_rows) }}</strong><small>Within the selected data scope</small></div>
+
+        <div class="stat"><span>Records with tick-related terms</span><strong>{{ tick_percentage }}%</strong><small>Not a disease prevalence estimate</small></div>
+
+        <div class="stat"><span>Data period</span><strong class="date-stat">{{ start_date }}</strong><small>Through {{ end_date }}</small></div>
+
+      </section>
+
+      <section id="seasonality" class="section">
+
+        <div class="section-head"><div><span class="eyebrow">HISTORICAL ACTIVITY</span><h2>When do tick-related visits increase?</h2><p>Look for patterns across months and years, not just one unusually busy week.</p></div><span class="section-pill">Historical · not forecast</span></div>
+
+        <div class="panel"><div class="panel-heading"><div><h3>When do pets visit the vet for tick-related problems?</h3><p>This graph shows the number of veterinary records mentioning ticks each month. Higher values mean more tick-related records were reported. This is historical activity, not a forecast.</p></div><span class="chart-chip">Interactive</span></div><div id="trendChart" class="chart"></div><div class="chart-explainer"><strong>What does this tell us?</strong> Look for months with higher recorded tick-related activity. These patterns can help clinics plan ahead. Records mentioning ticks are not necessarily confirmed tick cases.</div></div>
+
+        <div class="two-col">
+
+          <div class="panel"><div class="panel-heading"><div><h3>Which months have the most tick-related vet records?</h3><p>This graph compares average recorded tick-related activity across months in years with complete data. It helps show seasonal patterns.</p></div></div><div id="seasonChart" class="chart"></div></div>
+
+          <div class="panel"><div class="panel-heading"><div><h3>How does tick-related activity differ each year?</h3><p>This graph compares recorded tick-related activity between years. Some years have incomplete data, so comparisons should be made carefully.</p></div></div><div id="yearChart" class="chart"></div></div>
+
+        </div>
+
+        <details class="details"><summary>See the busiest recorded month in each year</summary><div class="peak-grid">{% for p in peak_data %}<div class="peak"><span>{{ p.year }}</span><strong>{{ p.month }}</strong><small>{{ p.count }} matched rows</small></div>{% else %}<p>No months available for this selection.</p>{% endfor %}</div></details>
+
+      </section>
+
+      <section id="search-signals" class="section">
+
+        <div class="section-head"><div><span class="eyebrow">SEARCH BEHAVIOUR</span><h2>Are people searching for tick symptoms before vet visits?</h2><p>Compare Queensland Google search interest with recorded veterinary activity.</p></div><span class="section-pill">Google Trends</span></div>
+
+        <div class="panel"><div class="panel-heading"><div><h3>Do Google searches increase before tick-related vet visits?</h3><p>This graph compares Queensland Google searches about ticks with veterinary records mentioning ticks. The two lines use different scales: Google search interest (0–100) and number of matched veterinary records.</p></div></div><div id="googleChart" class="chart chart-large"></div><div class="chart-explainer"><strong>How to read this:</strong> Use the legend to identify the Google search line and the veterinary record line. Google Trends scores range from 0 to 100; 100 means the highest relative search interest in the selected period, not 100 searches. The other line shows records mentioning ticks. If searches rise before records, they might offer an early signal, but our research has not shown a consistent improvement in forecasting from Google Trends. The lines use different vertical scales.</div></div>
+
+      </section>
+
+      <section id="forecast" class="section">
+
+        <div class="section-head"><div><span class="eyebrow">FORECAST OUTLOOK</span><h2>What does the forecasting research tell us?</h2><p>Keep model predictions separate from observed consultations.</p></div></div>
+
+        <div class="forecast-grid"><div class="forecast-card"><span class="forecast-icon">◷</span><h3>2026 seasonal outlook</h3><p>Your earlier research figure estimated a late-October seasonal peak for South East Queensland, based on historical corresponding weeks. It is not a new prediction generated by this dashboard.</p><div class="forecast-metric"><strong>25 Oct 2026</strong><span>Peak week in the previously shared seasonal outlook</span></div><div class="forecast-metric"><strong>1.37 per 1,000</strong><span>Expected tick-related consultation rate in that outlook</span></div></div><div class="forecast-explain"><h3>Understanding the outlook</h3><p><strong>Observed:</strong> what was actually recorded before the forecast cutoff.</p><p><strong>Expected:</strong> a historical seasonal estimate, not guaranteed future visits.</p><p><strong>Historical range:</strong> how much the comparable weeks varied in earlier years.</p><div class="notice">The notebook's validated model predictions and evaluation metrics have not yet been connected to this page. No fabricated accuracy scores or future values are shown.</div></div></div>
+
+        <div class="panel">
+
+          <div class="panel-heading">
+
+            <div>
+
+              <h3>SARIMA Forecast</h3>
+
+              <p>Forecasted veterinary tick demand based on historical patterns.</p>
+
+            </div>
+
+            <span class="chart-chip">Forecast</span>
+
+          </div>
+
+          {% if sarima_available %}
+
+            <div id="sarimaChart" class="chart chart-large"></div>
+
+            <div class="chart-explainer">
+
+              Forecast period: {{ sarima_start }} to {{ sarima_end }}.
+
+              Forecasts are estimates, not guaranteed future demand.
+
+            </div>
+
+          {% else %}
+
+            <div class="notice">
+
+              {{ sarima_error or "SARIMA forecast is not available." }}
+
+            </div>
+
+          {% endif %}
+
+        </div>
+
+  
+    </section>
+
+      <section id="clinics" class="section"><div class="section-head"><div><span class="eyebrow">LOCATION INTELLIGENCE</span><h2>Where might clinics need to prepare?</h2><p>A geographic view will be useful after clinic IDs have been matched to verified locations.</p></div></div><div class="pending"><span class="pending-symbol">◎</span><div><h3>Clinic map awaiting verified locations</h3><p>We are deliberately not displaying raw source identifiers as real clinic locations. Mapping requires the validated clinic-to-suburb or coordinate reference.</p></div><span class="pending-tag">Not yet connected</span></div></section>
+
+      <section id="method" class="section"><div class="section-head"><div><span class="eyebrow">TRANSPARENCY</span><h2>What should you know about these numbers?</h2></div></div><div class="method-grid"><div><h3>What counts as a tick-related record?</h3><p>At present, a consultation row is counted when specified tick-related terms appear in its text fields. This classification is preliminary and needs validation against your notebook method.</p></div><div><h3>Are these unique consultations?</h3><p>Not necessarily. They are source rows, and the source datasets have overlapping coverage. Clinic identifiers also cannot safely be assumed to match across sources.</p></div><div><h3>Does Google Trends predict demand?</h3><p>This page shows a comparison, not proof of forecasting improvement. Use the notebook's validated out-of-sample evaluation to assess predictive value.</p></div></div></section>
+
+      <footer>VetIQ Digital Epidemiology Prototype <span>RMIT University · Curious Cat · P000292DS</span></footer>
+
+    </div>
+
+  </main>
+
+  <script>
+    const cfg = {
+      responsive: true,
+      displaylogo: false,
+      modeBarButtonsToRemove: ['lasso2d', 'select2d']
+    };
+
+    // Render charts independently, so one failure does not hide the others.
+    function renderVetIQChart(id, figure) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      try {
+        if (typeof Plotly === 'undefined') {
+          throw new Error('Plotly.js did not load. Check your internet connection.');
+        }
+        if (typeof figure === 'string') figure = JSON.parse(figure);
+        if (!figure || !Array.isArray(figure.data)) {
+          throw new Error('Chart data is missing or invalid.');
+        }
+        const height = (id === 'googleChart' || id === 'sarimaChart') ? 410 : 345;
+        const layout = {
+          ...(figure.layout || {}),
+          autosize: true,
+          height,
+          margin: {l: 55, r: id === 'googleChart' ? 65 : 22, t: 42, b: 65},
+          font: {family: 'Inter, system-ui, sans-serif', size: 12, color: '#475569'},
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)'
+        };
+        Plotly.newPlot(el, figure.data, layout, cfg).catch(error => {
+          console.error('Plotly error for ' + id, error);
+          el.textContent = 'Unable to display chart: ' + error.message;
+        });
+      } catch (error) {
+        console.error('Chart error for ' + id, error);
+        el.textContent = 'Unable to display chart: ' + error.message;
+      }
+    }
+
+    renderVetIQChart('trendChart', {{ weekly_graph | tojson }});
+    renderVetIQChart('seasonChart', {{ season_graph | tojson }});
+    renderVetIQChart('yearChart', {{ yearly_graph | tojson }});
+    renderVetIQChart('googleChart', {{ google_graph | tojson }});
+    {% if sarima_available %}
+    renderVetIQChart('sarimaChart', {{ sarima_graph | tojson }});
+    {% endif %}
+  </script>
+
+</body>
+
+</html>
