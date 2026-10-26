@@ -2,3 +2,4 @@
 Tick[[:space:]]Analysis/Appointment.csv filter=lfs diff=lfs merge=lfs -text
 Tick[[:space:]]Analysis/Consultation.csv filter=lfs diff=lfs merge=lfs -text
 Tick[[:space:]]Analysis/Patients.csv filter=lfs diff=lfs merge=lfs -text
+data/cleaned/consultations_freetext_part_*.csv filter=lfs diff=lfs merge=lfs -text
