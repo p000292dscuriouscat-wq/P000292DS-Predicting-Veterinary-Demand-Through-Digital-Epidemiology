@@ -2,7 +2,7 @@
 
 **RMIT University | Master of Data Science | Capstone Project (P000292DS)**
 
-**Industry Partner:** VetIQ (Curious Cat)  
+**Industry Partner:** Mike Da Gama, Founder,VetIQ(Curious Cat)  
 **Academic Supervisor:** H. Ruda Nie  
 **Project Team:** Asmi Faisel(s4134240), Bhairavi Chavan(s4133496), Sreelakshmi Thalodil Sunilkumar(s4146925)
 **Year:** 2026
